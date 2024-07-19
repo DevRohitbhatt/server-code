@@ -2,14 +2,19 @@ const mysql = require('mysql');
 
 // Set up MySQL connection
 const connection = mysql.createConnection({
-	// host: '34.174.81.205',
-	// user: 'uh9zvveiy4ce9',
-	// password: 'g7dzrqgbkmpj',
-	// database: 'db1zggku2qb1qr',
-	host: 'sql3.freemysqlhosting.net',
-	user: 'sql3720685',
-	password: 'avVsYZjp1h',
-	database: 'sql3720685',
+	host: '34.174.81.205',
+	user: 'uh9zvveiy4ce9',
+	password: 'g7dzrqgbkmpj',
+	database: 'db1zggku2qb1qr',
+	// host: 'sql3.freemysqlhosting.net',
+	// user: 'sql3720685',
+	// password: 'avVsYZjp1h',
+	// database: 'sql3720685',
+	waitForConnections: true,
+	connectionLimit: 10,
+	queueLimit: 0,
+	keepAliveInitialDelay: 10000, // 0 by default.
+	enableKeepAlive: true,
 });
 
 connection.connect((err) => {
