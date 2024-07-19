@@ -1,56 +1,96 @@
 const express = require('express');
-const cors = require('cors');
-//const bodyParser = require('body-parser');
-
+const mysql = require('mysql2/promise');
 const app = express();
-const port = 3000;
-app.use(cors());
-
-// Import the MySQL connection
-const db = require('./db');
+const port = 5000;
 
 app.use(express.json());
 
-// Handle incoming POST request to insert data into form2data table
-app.post('/webhook', (req, res) => {
-	const { full_name, email, phone, address1, date_created } = req.body; // Assuming field1, field2, field3 are the fields in the form
+const dbConfig = {
+	host: '34.174.81.205',
+	user: 'uh9zvveiy4ce9',
+	password: 'g7dzrqgbkmpj',
+	database: 'db1zggku2qb1qr',
+};
 
-	console.log('Received data:', req.body);
+app.post('/webhook', async (req, res) => {
+	let connection;
+	const { full_name, email, phone, address1, date_created } = req.body;
 
-	const query = `INSERT INTO form2data (name, email, phone, address, date_time ) VALUES (?, ?, ?)`;
-	const values = [full_name, email, phone, address1, date_created];
+	try {
+		// Get a connection from the pool
+		connection = await mysql.createConnection(dbConfig);
 
-	db.query(query, values, (err, results) => {
-		if (err) {
-			console.error('Error inserting data:', err);
-			res.status(500).json({ error: 'Error inserting data' });
-			return;
+		// Correct the INSERT query
+		const query = `INSERT INTO \`form1data\` (\`date_time\`, \`name\`, \`email\`, \`phone\`, \`address\`) VALUES ('${date_created}', '${full_name}', '${email}', '${phone}', '${address1}')`;
+		await connection.query(query);
+
+		res.status(200).send('Data inserted successfully.');
+	} catch (error) {
+		console.error('Database query error:', error);
+		res.status(500).send('Internal Server Error');
+	} finally {
+		// Release the connection back to the pool
+		if (connection) {
+			connection.end();
 		}
-
-		res.json({ message: 'Data inserted successfully' });
-	});
+	}
 });
 
-// Handle incoming webhook data
-app.get('/data', (req, res) => {
-	const query = 'SELECT * FROM form2data';
+app.post('/updatewebhook', async (req, res) => {
+	let connection;
+	const {
+		full_name,
+		email,
+		phone,
+		address1,
+		date_created,
+		'How would you rate the current condition of your property? (We buy properties in ANY condition..)':
+			propertyCondition,
+		"What's your reason for wanting to sell?": reasonForSelling,
+		'How soon would you like to sell?': sellTimeline,
+		'What type of property are you wanting to sell?': propertyType,
+		'Is the property currently listed with a realtor?': listedWithRealtor,
+		'Is your home occupied?': homeOccupied,
+	} = req.body;
 
-	db.query(query, (err, results) => {
-		if (err) {
-			console.error('Error fetching data:', err);
-			res.status(500).json({ error: 'Error fetching data' });
-			return;
+	try {
+		// Get a connection from the pool
+		connection = await mysql.createConnection(dbConfig);
+
+		// Correct the INSERT query
+		const query = `INSERT INTO \`form2data\` (\`date_time\`, \`name\`, \`email\`, \`phone\`, \`address\`, \`What type of property are you wanting to sell?\`, \`What's your reason for wanting to sell?\`, \`How would you rate the current condition of your property? (We b\`, \`How soon would you like to sell?\`, \`Is your home occupied?\`, \`Is the house currently listed with realtor?\`) VALUES ('${date_created}', '${full_name}', '${email}', '${phone}', '${address1}', '${propertyType}', '${reasonForSelling}', '${propertyCondition}', '${sellTimeline}', '${homeOccupied}', '${listedWithRealtor}')`;
+		await connection.query(query);
+
+		res.status(200).send('Data inserted successfully.');
+	} catch (error) {
+		console.error('Database query error:', error);
+		res.status(500).send('Internal Server Error');
+	} finally {
+		// Release the connection back to the pool
+		if (connection) {
+			connection.end();
 		}
-
-		res.json(results);
-	});
+	}
 });
 
-// Test route to check server is running
-app.get('/', (req, res) => {
-	res.send('Hello World!');
+app.get('/data', async (req, res) => {
+	let connection;
+	try {
+		// Establish a new connection for each request
+		connection = await mysql.createConnection(dbConfig);
+		const [rows, fields] = await connection.query('SELECT * FROM form2data');
+		res.json(rows);
+	} catch (error) {
+		console.error('Database query error:', error);
+		res.status(500).send('Internal Server Error');
+	} finally {
+		// Ensure the connection is closed after the query
+		if (connection) {
+			await connection.end();
+		}
+	}
 });
 
 app.listen(port, () => {
-	console.log(`Server running at http://localhost:${port}`);
+	console.log(`Server is listening on port ${port}`);
 });
