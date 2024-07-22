@@ -21,8 +21,9 @@ app.post('/webhook', async (req, res) => {
 		connection = await mysql.createConnection(dbConfig);
 
 		// Correct the INSERT query
-		const query = `INSERT INTO \`form1data\` (\`date_time\`, \`name\`, \`email\`, \`phone\`, \`address\`) VALUES ('${date_created}', '${full_name}', '${email}', '${phone}', '${address1}')`;
-		await connection.query(query);
+		query = `INSERT INTO form1data (date_time, name, email, phone, address) VALUES (?, ?, ?, ?, ?)`;
+		values = [date_created, full_name, email, phone, address1];
+		await connection.query(query, values);
 
 		res.status(200).send('Data inserted successfully.');
 	} catch (error) {
@@ -58,7 +59,18 @@ app.post('/updatewebhook', async (req, res) => {
 		connection = await mysql.createConnection(dbConfig);
 
 		// Correct the INSERT query
-		const query = `INSERT INTO \`form2data\` (\`date_time\`, \`name\`, \`email\`, \`phone\`, \`address\`, \`What type of property are you wanting to sell?\`, \`What's your reason for wanting to sell?\`, \`How would you rate the current condition of your property? (We b\`, \`How soon would you like to sell?\`, \`Is your home occupied?\`, \`Is the house currently listed with realtor?\`) VALUES ('${date_created}', '${full_name}', '${email}', '${phone}', '${address1}', '${propertyType}', '${reasonForSelling}', '${propertyCondition}', '${sellTimeline}', '${homeOccupied}', '${listedWithRealtor}')`;
+		const query = `UPDATE \`form2data\` SET 
+    \`date_time\` = '${date_created}', 
+    \`name\` = '${full_name}', 
+    \`phone\` = '${phone}', 
+    \`address\` = '${address1}', 
+    \`What type of property are you wanting to sell?\` = '${propertyType}', 
+    \`What's your reason for wanting to sell?\` = '${reasonForSelling}', 
+    \`How would you rate the current condition of your property? (We b\` = '${propertyCondition}', 
+    \`How soon would you like to sell?\` = '${sellTimeline}', 
+    \`Is your home occupied?\` = '${homeOccupied}', 
+    \`Is the house currently listed with realtor?\` = '${listedWithRealtor}'
+WHERE \`email\` = '${email}'`;
 		await connection.query(query);
 
 		res.status(200).send('Data inserted successfully.');
