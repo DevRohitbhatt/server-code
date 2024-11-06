@@ -14,15 +14,38 @@ const dbConfig = {
 
 app.post('/webhook', async (req, res) => {
 	let connection;
-	const { full_name, email, phone, address1, date_created } = req.body;
+	const {
+		full_name,
+		email,
+		phone,
+		address1,
+		date_created,
+		'Utm Source': utm_source,
+		'Utm Campaign': utm_campaign,
+		'Utm Content': utm_content,
+		'Utm Keyword': utm_keyword,
+		'Utm Match Type': utm_matchtype,
+	} = req.body;
 
 	try {
 		// Get a connection from the pool
 		connection = await mysql.createConnection(dbConfig);
 
 		// Correct the INSERT query
-		query = `INSERT INTO form1data (date_time, name, email, phone, address) VALUES (?, ?, ?, ?, ?)`;
-		values = [date_created, full_name, email, phone, address1];
+		query = `INSERT INTO form1data (date_time, name, email, phone, address, utm_source, utm_campaign, utm_content, utm_keyword, utm_matchtype) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+		values = [
+			date_created,
+			full_name,
+			email,
+			phone,
+			address1,
+			utm_source,
+			utm_campaign,
+			utm_content,
+			utm_keyword,
+			utm_matchtype,
+		];
+
 		await connection.query(query, values);
 
 		res.status(200).send('Data inserted successfully.');
