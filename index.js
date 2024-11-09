@@ -20,6 +20,7 @@ app.post('/webhook', async (req, res) => {
 		phone,
 		address1,
 		date_created,
+		'Google Ads Id': gclid,
 		'Utm Source': utm_source,
 		'Utm Campaign': utm_campaign,
 		'Utm Content': utm_content,
@@ -32,13 +33,14 @@ app.post('/webhook', async (req, res) => {
 		connection = await mysql.createConnection(dbConfig);
 
 		// Correct the INSERT query
-		query = `INSERT INTO form1data (date_time, name, email, phone, address, utm_source, utm_campaign, utm_content, utm_keyword, utm_matchtype) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+		query = `INSERT INTO form1data (date_time, name, email, phone, address, gclid, utm_source, utm_campaign, utm_content, utm_keyword, utm_matchtype) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		values = [
 			date_created,
 			full_name,
 			email,
 			phone,
 			address1,
+			gclid,
 			utm_source,
 			utm_campaign,
 			utm_content,
